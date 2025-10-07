@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const ProductApp());
+}
+
+class ProductApp extends StatelessWidget {
+  const ProductApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Katalog Produk Dinamis',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(useMaterial3: true),
+      home: const ProductCatalogPage(),
+    );
+  }
+}
+
+class ProductCatalogPage extends StatelessWidget {
+  const ProductCatalogPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Katalog Produk Dinamis'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+      ),
+      body: const ProductGrid(),
+    );
+  }
+}
+
+class ProductGrid extends StatefulWidget {
+  const ProductGrid({super.key});
+
+  @override
+  State<ProductGrid> createState() => _ProductGridState();
+}
+
+class _ProductGridState extends State<ProductGrid> {
+  // Contoh data dummy produk
+  final List<String> products = [
+    "Sepatu Sport",
+    "Tas Kulit",
+    "Jam Tangan",
+    "Topi Fashion",
+    "Kacamata",
+    "Jaket Denim",
+    "Kaos Polos",
+    "Celana Jeans"
+  ];
+
+  // Untuk melacak produk yang sedang ditekan (animasi aktif)
+  int? selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    // Dapatkan ukuran layar
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Tentukan jumlah kolom berdasarkan lebar layar
+    int crossAxisCount = 2; // default untuk ponsel
+    if (screenWidth > 600 && screenWidth <= 900) {
+      crossAxisCount = 3; // tablet kecil
+    } else if (screenWidth > 900) {
+      crossAxisCount = 4; // tablet besar
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            bool isSelected = selectedIndex == index;
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedIndex = isSelected ? null : index;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.blueAccent : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(isSelected ? 30 : 15),
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.4),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                    fontSize: isSelected ? 20 : 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  child: Text(products[index]),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
